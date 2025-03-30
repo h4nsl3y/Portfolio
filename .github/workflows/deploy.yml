@@ -51,12 +51,12 @@ jobs:
           name: production-files  
           path: ./dist  
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub 
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GIT_WEB_TOKEN }}
           publish_dir: ./dist  
 
-      -  name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
