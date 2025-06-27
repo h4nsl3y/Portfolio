@@ -74,7 +74,7 @@ const CircleVisualizer = () => {
         const endBin = Math.floor((range.end / audioContext!.sampleRate) * analyser.fftSize);
         const subDataArray = dataArray.slice(startBin, endBin);
         const averageAmplitude = subDataArray.reduce((acc, val) => acc + val, 0) / subDataArray.length;
-        const circleSize = averageAmplitude / 255 * 200;
+        const circleSize = averageAmplitude / 255 * 500;
 
         const position = circlePositions[index];
         ctx.beginPath();
@@ -97,9 +97,7 @@ const CircleVisualizer = () => {
   }, [analyser, audioContext]);
 
   return (
-    <div className="h-full w-full flex items-center justify-center glass">
-      <canvas ref={canvasRef} className="h-4/5 w-4/5 glass" />
-    </div>
+      <canvas ref={canvasRef} className="h-full aspect-square" />
   );
 };
 

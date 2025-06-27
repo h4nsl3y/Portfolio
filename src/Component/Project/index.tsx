@@ -8,8 +8,18 @@ let titleText: string = `text-[1rem] sm:text-[1.2rem] 2xl:text-[1.5rem]`;
 const index = () => {
     useEffect(() => {
         function appear(){
-          let subArea = document.getElementById('subScreenFrame');
-          if(subArea){subArea.style.opacity="1";}
+          let subArea = document.getElementById('Project');
+          subArea?.animate(
+            [
+              { transform: "scale(0.5)", opacity: 0 }, // Initial state
+              { transform: "scale(1)", opacity: 1 } // Final state
+            ],
+            {
+              duration: 500,        
+              easing: "ease-out",   
+              fill: "forwards"      
+            }
+          )
         }
         appear()
       }, []);

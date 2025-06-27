@@ -8,8 +8,18 @@ let coloredLetters: string ='w-fit h-fit bg-gradient-to-r from-[#00ffff] to-[#ff
 const index = () => {
   useEffect(() => {
     function appear(){
-      let subArea = document.getElementById('subScreenFrame');
-      if(subArea){subArea.style.opacity="1";}
+      let subArea = document.getElementById('Home');
+      subArea?.animate(
+        [
+          { transform: "scale(0.5)", opacity: 0 }, // Initial state
+          { transform: "scale(1)", opacity: 1 } // Final state
+        ],
+        {
+          duration: 500,        
+          easing: "ease-out",   
+          fill: "forwards"      
+        }
+      )
     }
     appear()
   }, []);
