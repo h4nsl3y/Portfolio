@@ -2,6 +2,7 @@ import navigation_icon from '@/assets/image/navigation_icon.png';
 import home_icon from '@/assets/image/home_icon.png';
 import user_icon from '@/assets/image/user_icon.png';
 import code_icon from '@/assets/image/code_icon.png';
+import lab_icon from '@/assets/image/lab_icon.png';
 import ripple_icon from '@/assets/image/ripple_icon.png'
 import document_icon from '@/assets/image/document_icon.png';
 import phone_icon from '@/assets/image/phone_icon.png';
@@ -73,13 +74,13 @@ let imageClass = 'w-[20px] h-[20px] sm:w-2/5 sm:h-2/5 m-[10px] sm:m-auto dark:in
             </label>
           </div>
           {
-            window.innerWidth <= 640
+            window.innerWidth >= 640
             &&
-            <div className={`w-full h-fit flex flex-row rounded text-center items-center`}>
-            <label className={`${buttonClass} ${option == "Audio" ? "bg-mainColorSelected" : "bg-transparent"}`} onMouseEnter={()=>handleFollowerText('Audio')} onMouseLeave={()=>handleFollowerText('')}>
-              <input type="radio" name="screen" value="Audio" className={`absolute opacity-0 w-[0px] h-[0px]`} onChange={handleOptionChange}/>
-              <img src={ripple_icon} className={`${imageClass}`}/>
-              <p>Audio</p> 
+          <div className={`w-full h-fit flex flex-row rounded text-center items-center`}>
+            <label className={`${buttonClass} ${option == "Lab" ? "bg-mainColorSelected" : "bg-transparent"}`} onMouseEnter={()=>handleFollowerText('Lab')} onMouseLeave={()=>handleFollowerText('')}>
+              <input type="radio" name="screen" value="Lab" className={`absolute opacity-0 w-[0px] h-[0px]`} onChange={handleOptionChange}/>
+              <img src={lab_icon} className={`${imageClass}`}/>
+              {window.innerWidth <= 640 && <p>Lab</p> }
             </label>
           </div>
           }

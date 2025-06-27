@@ -12,8 +12,18 @@ let contentText: string = `text-[0.6rem] sm:text-[0.7rem] 2xl:text-[0.9rem]`;
 const index = () => {
   useEffect(() => {
     function appear(){
-      let subArea = document.getElementById('subScreenFrame');
-      if(subArea){subArea.style.opacity="1";}
+      let subArea = document.getElementById('About');
+      subArea?.animate(
+        [
+          { transform: "scale(0.5)", opacity: 0 }, // Initial state
+          { transform: "scale(1)", opacity: 1 } // Final state
+        ],
+        {
+          duration: 500,        
+          easing: "ease-out",   
+          fill: "forwards"      
+        }
+      )
     }
     appear()
   }, []);
