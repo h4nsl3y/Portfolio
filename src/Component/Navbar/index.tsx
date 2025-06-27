@@ -3,7 +3,6 @@ import home_icon from '@/assets/image/home_icon.png';
 import user_icon from '@/assets/image/user_icon.png';
 import code_icon from '@/assets/image/code_icon.png';
 import lab_icon from '@/assets/image/lab_icon.png';
-import ripple_icon from '@/assets/image/ripple_icon.png'
 import document_icon from '@/assets/image/document_icon.png';
 import phone_icon from '@/assets/image/phone_icon.png';
 import email_icon from '@/assets/image/email_icon.png';
