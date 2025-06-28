@@ -61,7 +61,6 @@ const index = () => {
                     <div className={`w-full h-full flex flex-col gap-2 items-center justify-center `} style = {Css.borderStyle}>
                       <ToggleButton OriginalText='Click me to ...splash??' ChangedText='SPLASH!!!' onClickAction={(event: MouseEvent<HTMLButtonElement>) => splashSwitch(event)}/>
                       <ToggleButton OriginalText='Click me to ...splash??' ChangedText='SPLASH!!!' onClickAction={(event: MouseEvent<HTMLButtonElement>) => splashSwitch(event)}/>
-                      <ToggleButton OriginalText='Click me to ...splash??' ChangedText='SPLASH!!!' onClickAction={(event: MouseEvent<HTMLButtonElement>) => splashSwitch(event)}/>
                     </div>
 
                 </div>
