@@ -837,10 +837,6 @@ video {
   height: 1rem;
 }
 
-.h-4\/5 {
-  height: 80%;
-}
-
 .h-4\/6 {
   height: 66.666667%;
 }
@@ -979,12 +975,12 @@ video {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.grid-cols-\[90vw\] {
-  grid-template-columns: 90vw;
-}
-
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-\[90vw\] {
+  grid-template-columns: 90vw;
 }
 
 .grid-rows-1 {
@@ -1009,10 +1005,6 @@ video {
 
 .items-center {
   align-items: center;
-}
-
-.justify-end {
-  justify-content: flex-end;
 }
 
 .justify-center {
