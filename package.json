@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://h4nsl3y.github.io/Portfolio-v1.0/",
+  "homepage": "https://h4nsl3y.github.io/Portfolio/",
   "scripts": {
     "dev": "vite",
     "deploy": "gh-pages -d dist",

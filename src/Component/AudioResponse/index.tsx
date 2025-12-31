@@ -1,5 +1,5 @@
+import React from 'react';
 import { useEffect, useRef, useState } from 'react';
-
 const CircleVisualizer = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
@@ -9,28 +9,24 @@ const CircleVisualizer = () => {
   const difference = size / 12;
   const borderSize = difference / 4;
 
-  useEffect(() => {
-    const initAudio = async () => {
-      try {
-        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const context = new AudioContext();
-        const micSource = context.createMediaStreamSource(micStream);
-        const destination = context.createMediaStreamDestination();
-        micSource.connect(destination);
-        const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 512;
-        const combinedStream = context.createMediaStreamSource(destination.stream);
-        combinedStream.connect(analyserNode);
+    async function initAudio() {
+        try {
+          const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const context = new AudioContext();
+          const micSource = context.createMediaStreamSource(micStream);
+          const destination = context.createMediaStreamDestination();
+          micSource.connect(destination);
+          const analyserNode = context.createAnalyser();
+          analyserNode.fftSize = 512;
+          const combinedStream = context.createMediaStreamSource(destination.stream);
+          combinedStream.connect(analyserNode);
 
-        setAudioContext(context);
-        setAnalyser(analyserNode);
+          setAudioContext(context);
+          setAnalyser(analyserNode);
       } catch (err) {
         console.error('Error accessing audio sources:', err);
       }
     };
-
-    initAudio();
-  }, []);
 
   useEffect(() => {
     if (!canvasRef.current || !analyser) return;
@@ -39,8 +35,8 @@ const CircleVisualizer = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerHeight /2;
+    canvas.height = window.innerHeight /2;
 
     const frequencyRanges = [
       { start: 0, end: 200, color: 'rgba(80, 80, 168, 0.25)' },
@@ -74,7 +70,7 @@ const CircleVisualizer = () => {
         const endBin = Math.floor((range.end / audioContext!.sampleRate) * analyser.fftSize);
         const subDataArray = dataArray.slice(startBin, endBin);
         const averageAmplitude = subDataArray.reduce((acc, val) => acc + val, 0) / subDataArray.length;
-        const circleSize = averageAmplitude / 255 * 500;
+        const circleSize = averageAmplitude / 255 * 100;
 
         const position = circlePositions[index];
         ctx.beginPath();
@@ -97,7 +93,18 @@ const CircleVisualizer = () => {
   }, [analyser, audioContext]);
 
   return (
-      <canvas ref={canvasRef} className="h-full aspect-square" />
+  <React.Fragment>
+    <div className={`w-full h-full items-center gap-2 justify-center row-span-2`}>
+          <div className={`w-full h-full flex items-center justify-center`}   style = {{background: 'rgba(80, 80, 168, 0.1)'}}>
+            <button onClick={initAudio} >Click me!</button>
+          </div>
+      </div>
+      <div className={`w-full h-full items-center justify-center row-span-6`}>
+          <div className={`h-full w-full flex items-center justify-center text-2xl font-bold`} style = {{background: 'rgba(80, 80, 168, 0.1)'}}>
+            <canvas ref={canvasRef} id="AudioCanvas"  className="h-full aspect-square" aria-checked="false"/>
+          </div>
+      </div>
+  </React.Fragment>
   );
 };
 
