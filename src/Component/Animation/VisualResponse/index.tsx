@@ -1,11 +1,35 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Hands, HAND_CONNECTIONS, Results, NormalizedLandmark } from "@mediapipe/hands";
-import { Camera } from "@mediapipe/camera_utils";
-import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
+import { HAND_CONNECTIONS, Results, NormalizedLandmark } from "@mediapipe/hands";
 import CircularParticles from "@/Component/Animation/CircularParticles";
+
+declare global {
+  interface Window {
+    Hands: any;
+    Camera: any;
+    drawConnectors: any;
+    drawLandmarks: any;
+  }
+}
 
 interface IsActive {
   isVRActive: boolean;
+}
+
+
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.body.appendChild(script);
+  });
 }
 
 const VisualResponse: React.FC<IsActive> = ({ isVRActive }) => {
@@ -17,112 +41,116 @@ const VisualResponse: React.FC<IsActive> = ({ isVRActive }) => {
     canvasElement: HTMLCanvasElement,
     landmarks: NormalizedLandmark[]
   ) => {
-    const canvasWidth = canvasElement.width;
-    const canvasHeight = canvasElement.height;
+    const w = canvasElement.width;
+    const h = canvasElement.height;
     const wrist = landmarks[0];
     const fingerIndices = [4, 8, 12, 16, 20];
-    const distances: number[] = [];
 
-    fingerIndices.forEach((i) => {
-      const finger = landmarks[i];
-      const dx = finger.x * canvasWidth - wrist.x * canvasWidth;
-      const dy = finger.y * canvasHeight - wrist.y * canvasHeight;
-      distances.push(Math.sqrt(dx * dx + dy * dy));
+    const distances = fingerIndices.map((i) => {
+      const f = landmarks[i];
+      const dx = f.x * w - wrist.x * w;
+      const dy = f.y * h - wrist.y * h;
+      return Math.sqrt(dx * dx + dy * dy);
     });
 
-    const averageDistance =
-      distances.reduce((sum, d) => sum + d, 0) / fingerIndices.length;
-
-    const maxDistance = canvasWidth / 3;
-    return Math.min(1, averageDistance / maxDistance);
+    const avg = distances.reduce((a, b) => a + b, 0) / distances.length;
+    return Math.min(1, avg / (w / 3));
   };
 
   useEffect(() => {
     if (!isVRActive) return;
 
-    const videoElement = videoRef.current;
-    const canvasElement = canvasRef.current;
-    if (!videoElement || !canvasElement) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
 
-    const ctx = canvasElement.getContext("2d");
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let camera: Camera | null = null;
+    let camera: any = null;
+    let cancelled = false;
 
-    // ✅ CLEAN, BUILD-SAFE CAMERA CHECK
-    const canUseCamera =
-      typeof navigator !== "undefined" &&
-      "mediaDevices" in navigator &&
-      typeof navigator.mediaDevices.getUserMedia === "function";
+    const init = async () => {
+      // 🚫 SSR / GH Pages safe camera check
+      if (
+        typeof navigator === "undefined" ||
+        !navigator.mediaDevices?.getUserMedia
+      ) {
+        console.warn("Camera not available");
+        return;
+      }
 
-    if (!canUseCamera) {
-      console.warn("Webcam not available in this environment.");
-      return;
-    }
+      try {
+        // ✅ Load MediaPipe scripts ONLY when needed
+        await Promise.all([
+          loadScript("https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"),
+          loadScript(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"
+          ),
+          loadScript(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+          ),
+        ]);
 
-    try {
-      const hands = new Hands({
-        locateFile: (file) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-      });
+        if (cancelled) return;
 
-      hands.setOptions({
-        maxNumHands: 1,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
+        const hands = new window.Hands({
+          locateFile: (file: string) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        });
 
-      hands.onResults((results: Results) => {
-        ctx.save();
-        ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        hands.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
 
-        if (results.image) {
-          ctx.drawImage(
-            results.image,
-            0,
-            0,
-            canvasElement.width,
-            canvasElement.height
-          );
-        }
+        hands.onResults((results: Results) => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const handLandmarks = results.multiHandLandmarks?.[0];
-        if (handLandmarks) {
-          drawConnectors(ctx, handLandmarks, HAND_CONNECTIONS, {
-            color: "#00FF00",
-            lineWidth: 5,
-          });
-          drawLandmarks(ctx, handLandmarks, {
-            color: "#FF0000",
-            lineWidth: 2,
-          });
-
-          const factor = getEuclidianDist(canvasElement, handLandmarks);
-          setRadiusFactor(factor);
-        }
-
-        ctx.restore();
-      });
-
-      camera = new Camera(videoElement, {
-        onFrame: async () => {
-          try {
-            await hands.send({ image: videoElement });
-          } catch (e) {
-            console.error("Hands frame error:", e);
+          if (results.image) {
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
           }
-        },
-        width: 1280,
-        height: 720,
-      });
 
-      camera.start();
-    } catch (err) {
-      console.error("Camera/Hands initialization failed:", err);
-    }
+          const landmarks = results.multiHandLandmarks?.[0];
+          if (landmarks) {
+            window.drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+              color: "#00FF00",
+              lineWidth: 5,
+            });
+
+            window.drawLandmarks(ctx, landmarks, {
+              color: "#FF0000",
+              lineWidth: 2,
+            });
+
+            setRadiusFactor(getEuclidianDist(canvas, landmarks));
+          }
+        });
+
+        camera = new window.Camera(video, {
+          width: 1280,
+          height: 720,
+          onFrame: async () => {
+            try {
+              await hands.send({ image: video });
+            } catch (e) {
+              console.error("Hands frame error", e);
+            }
+          },
+        });
+
+        camera.start();
+      } catch (err) {
+        console.error("MediaPipe init failed:", err);
+      }
+    };
+
+    init();
 
     return () => {
+      cancelled = true;
       camera?.stop?.();
     };
   }, [isVRActive]);
@@ -131,15 +159,8 @@ const VisualResponse: React.FC<IsActive> = ({ isVRActive }) => {
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">
-      <video ref={videoRef} className="input_video" style={{ display: "none" }} />
-      <canvas
-        ref={canvasRef}
-        className="output_canvas"
-        width={1280}
-        height={720}
-        style={{ display: "none" }}
-      />
-
+      <video ref={videoRef} style={{ display: "none" }} />
+      <canvas ref={canvasRef} width={1280} height={720} style={{ display: "none" }} />
       <CircularParticles radiusFactor={radiusFactor} />
     </div>
   );
