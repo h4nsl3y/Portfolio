@@ -37,10 +37,6 @@ const CircularParticles: React.FC<CircularParticlesProps> = ({ radiusFactor }) =
 
     const minEntropy = 0.05;  // almost no randomness
     const maxEntropy = 0.5;   // very chaotic
-    const entropyScale = 3;   // controls steepness  // Smooth mapping using tanh (inverse of radiusFactor)
-    const entropyShift = 0.8; // center where entropy almost disappears
-    const gradientStart = 0.5;
-    const gradientEnd = 0.6;
 
     let entropy ;
     if (radiusFactor < 0.3) {
