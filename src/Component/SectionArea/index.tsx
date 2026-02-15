@@ -1,7 +1,6 @@
 import Home from '@/Component/Home'
 import About from '@/Component/About'
 import Project from '@/Component/Project'
-import AudioResponse from '@/Component/AudioResponse'
 import UIComponent from '@/Component/UIComponent'
 import '@/output.css'
 import Background from '../Background';
@@ -20,7 +19,6 @@ const index = ({option}: Props) => {
         {option == "About" && <About/>}
         {option == "Project" && <Project/>}
         {option == "Lab" && <UIComponent/>}
-        {option == "Audio" && <AudioResponse/>}
       </div>
     </div>
   )
