@@ -39,15 +39,31 @@ const CircularParticles: React.FC<CircularParticlesProps> = ({ radiusFactor }) =
     const maxEntropy = 0.5;   // very chaotic
     const entropyScale = 3;   // controls steepness  // Smooth mapping using tanh (inverse of radiusFactor)
     const entropyShift = 0.8; // center where entropy almost disappears
-    const entropy = ((Math.tanh(entropyScale * (entropyShift - radiusFactor)) + 1) / 2) * (maxEntropy - minEntropy) + minEntropy;
+    const gradientStart = 0.5;
+    const gradientEnd = 0.6;
+
+    let entropy ;
+    if (radiusFactor < 0.3) {
+        // below 0.4 → full chaotic
+        entropy = maxEntropy;
+    } else if (radiusFactor >= 0.3 && radiusFactor <= 0.7) {
+        // smooth decay between 0.4 → 0.9
+        const t = (0.7 - radiusFactor) / (0.7 - 0.3); // normalized 1 → 0
+        entropy = minEntropy + (maxEntropy - minEntropy) * t; 
+    } else {
+        // above 0.9 → stable
+        entropy = minEntropy;
+    }
+    
+    
 
     // Initialize particles
     const particles = Array.from({ length: particleCount }, () => ({
-      angle: Math.random() * Math.PI * 2,
-      speed: speedFactor + Math.random() * speedFactor * entropy, // slightly randomize speed
-      color: "rgba(255, 255, 255, 1)",
-      size: 1 + Math.random() * 2,
-        radiusOffset: radiusFactor < 0.4 ? (Math.random() - 0.5) * 1.5 * radius : 0
+        angle: Math.random() * Math.PI * 2,
+        speed: speedFactor + Math.random() * speedFactor * entropy, // slightly randomize speed
+        color: "rgba(255, 255, 255, 1)",
+        size: 1 + Math.random() * 2,
+        radiusOffset: radiusFactor < 0.4 ? (Math.random() - 0.5) * 1.5 * radius : (Math.random() - 0.5) * 2 * radius * entropy
     }));
 
     const animate = () => {
